@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   CheckHoverIcon,
 } from 'assets/images';
+import { clsx } from 'clsx'
 
 const StyledTaskItem = styled.div`
   min-height: 52px;
@@ -100,15 +101,40 @@ const StyledTaskItem = styled.div`
   }
 `;
 
-const TodoItem = () => {
+const TodoItem = ({userData, onChecked, onDelete, onEdit, onChangeItem}) => {
+
+  function handleClick (e){
+    if(e.target.className.includes('icon-checked')){ //判斷是勾勾的 icon
+      onChecked(userData.id) //處理 , 因為有從父元件傳來自己的 data 所以可以直接回傳自己的 id 當作參數
+    }
+    else if(e.target.className.includes('btn-destroy')){ //判斷是 X
+      onDelete(userData.id) //處理
+    }
+  }
+  function handleKeyDown (e){
+    if(userData.isEdit && e.key === 'Enter'){
+      onChangeItem(e.target.value, userData.id)
+    }
+  }
+
   return (
-    <StyledTaskItem>
+    <StyledTaskItem 
+      className={clsx({done:userData.isDone, edit:userData.isEdit})} 
+      onClick={handleClick} //監聽 clik
+    >
       <div className="task-item-checked">
         <span className="icon icon-checked" />
       </div>
-      <div className="task-item-body">
-        <span className="task-item-body-text">todo</span>
-        <input className="task-item-body-input" />
+      <div 
+        className="task-item-body" 
+        onDoubleClick={ () => onEdit(userData.id) } //監聽 doubleClick
+        onKeyDown={handleKeyDown}// 監聽 keyDown
+      >
+        <span className="task-item-body-text">{userData.title}</span>
+        <input 
+          className="task-item-body-input" 
+          defaultValue={userData.title}
+        />
       </div>
       <div className="task-item-action ">
         <button className="btn-reset btn-destroy icon"></button>

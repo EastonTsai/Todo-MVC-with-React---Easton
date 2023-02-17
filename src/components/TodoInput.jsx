@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { clsx } from 'clsx'
+
 
 const StyledAddTodoContainer = styled.div`
   min-height: 52px;
@@ -67,15 +69,31 @@ const StyledAddTodoActionContainer = styled.div`
     }
   }
 `;
-const TodoInput = () => {
+const TodoInput = ({
+  inputValue, 
+  onInputValueChange, 
+  onKeyEnter, 
+  onInputAddClick
+}) => {
+
   return (
-    <StyledAddTodoContainer>
+    <StyledAddTodoContainer >
       <StyledLabelIcon className="icon" htmlFor="add-todo-input" />
       <StyledInputContainer>
-        <input id="add-todo-input" type="text" placeholder="新增工作" />
+        <input 
+          id="add-todo-input" 
+          type="text" 
+          placeholder="新增工作" 
+          value={inputValue} //input 的值不是 input 的值 , 是 state 的 inputValue
+          onChange={onInputValueChange} //觸發 input 的值有改變
+          onKeyDown={onKeyEnter} //監聽 keyDown 事件
+        />
       </StyledInputContainer>
-      <StyledAddTodoActionContainer>
-        <button className="btn-reset">新增</button>
+      <StyledAddTodoActionContainer className={clsx({active: inputValue.length > 0})}>
+        <button 
+          className="btn-reset"
+          onClick={onInputAddClick} //監聽 click 事件
+        >新增</button>
       </StyledAddTodoActionContainer>
     </StyledAddTodoContainer>
   );
