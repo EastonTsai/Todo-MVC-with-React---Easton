@@ -1,96 +1,53 @@
 import { Footer, Header, TodoCollection, TodoInput } from 'components';
-import { useState } from 'react'
-const dummyTodos = [
-  {
-    title: 'Learn react-router',
-    isDone: true,
-    id: 1,
-  },
-  {
-    title: 'Learn to create custom hooks',
-    isDone: false,
-    id: 2,
-  },
-  {
-    title: 'Learn to use context',
-    isDone: true,
-    id: 3,
-  },
-  {
-    title: 'Learn to implement auth',
-    isDone: false,
-    id: 4,
-  },
-];
+import { useState, useEffect } from 'react'
+import { getTodos, createTodo, patchTodo, deleteTodo } from '../api/CRUD'
+
+
 
 const TodoPage = () => {
-  const newDt = dummyTodos.map(dt => { //先把所有傳進來的資料加上 isEdit: false
-    return {
-      ...dt,
-      isEdit: false,
-    }
-  })
-  const [userData, setUserData] = useState(newDt) //記錄 rserDtat 因為有資料才會顯示 item
+  const [userTodos, setUserTodos] = useState([]) //記錄 rserDtat 因為有資料才會顯示 item
   const [inputValue, setInputValue] = useState('') //記錄 input 的值 , 主要解決 input 欄有值才出現 '新增' 按鍵
 
-  function handlePageClick (){ //點擊 <div> 的範圍內清除編輯模式
-    if(userData.find(ud => ud.isEdit === true)){
-      setUserData(userData.map(ud => {
-        ud.isEdit = false
-        return ud
+  //進到網頁裡完成第一次渲染後使用 getTodos 的 API 取得資料庫的 todos 
+  //'只觸發一次' 因為依賴一個空陣列 , 所以第一次渲染完就不會再被之後的渲染觸發
+  useEffect( () => {
+    async function getTodosAsync (){
+      try{
+        const todos = await getTodos()
+      setUserTodos( todos.map( (todo) => {
+        return { ...todo, isEdit: false}
       }))
-    }
+      }
+      catch(error){console.error(error)}
   }
-  function addItem (){//新增 item 項目
-    setUserData(
-        [
-          ...userData,
-          {
-            title: inputValue,
-            isDone: false,
-            id: userData[userData.length -1].id + 1,
-            isEdit: false,
-          }
-        ]
-      )
+  getTodosAsync()
+},[])
+
+  //新增到資料庫 , 再從資料庫抓取新的資料存到 userTodos
+  async function handleAddTodo (){
+    await createTodo({title: inputValue})
+    setUserTodos(await getTodos())
     setInputValue('')
   }
-
-  function handleInputValue (e){//處理 input 的值
-    setInputValue(e.target.value)
-  }
-  function handleKeyEnter (e){//處理 Enter 事件
+  //判斷 ? Enter 鍵 , 而且 inputValue 不是空的 , 就新增 todo
+  function handleKeyEnter (e){
     if(e.key === 'Enter' && inputValue.trim() !== ''){
-      addItem()
+      handleAddTodo()
     }
   }
-  function handleInputClick(){//處理 input 的 '新增' 按鍵
-    addItem()
+  //接收 id, isDone 參數 , 使用 patchTodo() 修改資料庫的資料 , 再 get 新的資料回來
+  async function handleChecked (id, isDone){
+    await patchTodo({id: id, isDone: !isDone})
+    setUserTodos( await getTodos())
   }
-
-  function handleChecked (id){//
-    setUserData(
-      userData.map( ud => {
-      if(ud.id === id){
-        ud.isDone= !ud.isDone
-        return ud
-      }
-      return ud
-    })
-    )
-  }
-  function handleDelete (id){
-    setUserData(
-      userData.filter(ud => {
-      if(ud.id !== id){
-        return ud
-      }
-    })
-    )
+  //拿到 id 使用 deleteTodo 刪除資料庫的資料 , 再 get 新的資料存到 userTodos
+  async function handleDelete (id){
+    await deleteTodo(id)
+    setUserTodos( await getTodos())
   }
   function handleEdit (id){
-    setUserData(
-      userData.map(ud => {
+    setUserTodos(
+      userTodos.map(ud => {
         if(ud.id === id && !ud.isDone){
           ud.isEdit= !ud.isEdit
           return ud
@@ -100,37 +57,29 @@ const TodoPage = () => {
       })
     )
   }
-  function handleChangeItem (editInput, id){
-    setUserData(
-      userData.map(ud => {
-        if(ud.id === id){
-          ud.title = editInput
-          ud.isEdit = false
-          return ud
-        }
-        return ud
-      })
-    )
+  async function handleEditEnter (editInput, id){
+    await patchTodo({id: id, title: editInput})
+    setUserTodos(await getTodos())
   }
   return (
-    <div onClick={handlePageClick}>
+    <div>
       TodoPage
       <Header />
       <TodoInput 
         inputValue={inputValue}  //state 的 value 傳進去
-        onInputValueChange={handleInputValue}  //監聽 input 改變
+        onInputValueChange={ (e) => {setInputValue(e.target.value)}}  //接收事件的 value 存到 setInputValue
         onKeyEnter={handleKeyEnter} //監聽 Enter 鍵
-        onInputAddClick={handleInputClick} //監聽 input 新增按鍵
+        onInputAddClick={ () => { handleAddTodo() }} //監聽 input 新增按鍵
       />
       <TodoCollection 
-        userData= {userData}
+        userTodos= {userTodos}
         onChecked={handleChecked}
         onDelete={handleDelete}
         onEdit={handleEdit}
-        onChangeItem={handleChangeItem}
+        onChangeItem={handleEditEnter}
       />
       <Footer 
-        userData={userData}
+        userTodos={userTodos}
       />
     </div>
   );

@@ -101,43 +101,39 @@ const StyledTaskItem = styled.div`
   }
 `;
 
-const TodoItem = ({userData, onChecked, onDelete, onEdit, onChangeItem}) => {
+const TodoItem = ({userTodo, onChecked, onDelete, onEdit, onChangeItem}) => {
 
-  function handleClick (e){
-    if(e.target.className.includes('icon-checked')){ //判斷是勾勾的 icon
-      onChecked(userData.id) //處理 , 因為有從父元件傳來自己的 data 所以可以直接回傳自己的 id 當作參數
-    }
-    else if(e.target.className.includes('btn-destroy')){ //判斷是 X
-      onDelete(userData.id) //處理
-    }
-  }
+  
   function handleKeyDown (e){
-    if(userData.isEdit && e.key === 'Enter'){
-      onChangeItem(e.target.value, userData.id)
+    if(userTodo.isEdit && e.key === 'Enter'){
+      onChangeItem(e.target.value, userTodo.id)
     }
   }
 
   return (
-    <StyledTaskItem 
-      className={clsx({done:userData.isDone, edit:userData.isEdit})} 
-      onClick={handleClick} //監聽 clik
-    >
+    <StyledTaskItem className={clsx({done:userTodo.isDone, edit:userTodo.isEdit})} >
       <div className="task-item-checked">
-        <span className="icon icon-checked" />
+        <span 
+          className="icon icon-checked" 
+          onClick={ () => { onChecked(userTodo.id, userTodo.isDone) }} 
+        />
       </div>
       <div 
         className="task-item-body" 
-        onDoubleClick={ () => onEdit(userData.id) } //監聽 doubleClick
+        onDoubleClick={ () => onEdit(userTodo.id) } //監聽 doubleClick
         onKeyDown={handleKeyDown}// 監聽 keyDown
       >
-        <span className="task-item-body-text">{userData.title}</span>
+        <span className="task-item-body-text">{userTodo.title}</span>
         <input 
           className="task-item-body-input" 
-          defaultValue={userData.title}
+          defaultValue={userTodo.title}
         />
       </div>
       <div className="task-item-action ">
-        <button className="btn-reset btn-destroy icon"></button>
+        <button
+          className="btn-reset btn-destroy icon"
+          onClick={ () => { onDelete( userTodo.id ) }}
+        />
       </div>
     </StyledTaskItem>
   );

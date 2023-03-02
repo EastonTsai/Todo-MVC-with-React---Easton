@@ -1,14 +1,14 @@
 import TodoItem from './TodoItem';
 
-const TodoCollection = ({userData, onChecked, onDelete, onEdit, onChangeItem}) => {
+const TodoCollection = ({userTodos, onChecked, onDelete, onEdit, onChangeItem}) => {
   return (
     <div>
       TodoCollection
-      {userData.map(ud => { //用 userData 產生每一筆 Item
+      {userTodos.map(ud => { //用 userTodos 產生每一筆 Item
         return( 
         <TodoItem 
           key={ud.id}
-          userData={ud}
+          userTodo={ud}
           onChecked={onChecked}
           onDelete={onDelete}
           onEdit={onEdit}
