@@ -6,8 +6,13 @@ import {
 } from 'components/common/auth.styled';
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
+import { Link } from 'react-router-dom';
+import { useState } from 'react'
 
 const LoginPage = () => {
+  const [ username, setUsername ] = useState('')
+  const [ email, setEmail ] = useState('')
+
   return (
     <AuthContainer>
       <div>
@@ -16,14 +21,28 @@ const LoginPage = () => {
       <h1>登入 Todo</h1>
 
       <AuthInputContainer>
-        <AuthInput />
+        <AuthInput 
+          label='帳號'
+          type='text'
+          placeholder='請輸入帳號'
+          value={username}
+          onChange={setUsername}
+        />
       </AuthInputContainer>
 
       <AuthInputContainer>
-        <AuthInput />
+        <AuthInput 
+          label='Email'
+          type='email'
+          placeholder='請輸入帳 Email'
+          value={email}
+          onChange={setEmail}
+        />
       </AuthInputContainer>
       <AuthButton>登入</AuthButton>
-      <AuthLinkText>註冊</AuthLinkText>
+      <Link to='/signup'>
+        <AuthLinkText>註冊</AuthLinkText>
+      </Link>
     </AuthContainer>
   );
 };
