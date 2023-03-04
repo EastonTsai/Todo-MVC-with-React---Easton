@@ -6,13 +6,29 @@ import {
 } from 'components/common/auth.styled';
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { singup } from 'api/auth';
 
 const SignUpPage = () => {
   const [ username, setUsername ] = useState('')
   const [ email, setEmail ] = useState('')
   const [ password, setPassword ] = useState('')
+  const navigate = useNavigate()
+
+  async function handleClick (){
+    try{
+      const singup = await singup({username, email, password})
+      if ( singup.success ){
+        navigate('/login')
+        return
+      }
+      return alert('此帳號密碼已被使用 ！')
+    }
+    catch(error){
+      console.error(error)
+    }
+  }
 
   return (
     <AuthContainer>
@@ -50,7 +66,9 @@ const SignUpPage = () => {
           onChange={setPassword}
         />
       </AuthInputContainer>
-      <AuthButton>註冊</AuthButton>
+      <AuthButton
+        onClick={handleClick}
+      >註冊</AuthButton>
       <Link to='/login'>
         <AuthLinkText>取消</AuthLinkText>
       </Link>
