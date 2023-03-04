@@ -7,8 +7,8 @@ import {
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react'
-import { login } from 'api/auth';
+import { useState, useEffect } from 'react'
+import { checkPermission, login } from 'api/auth';
 import Swal from 'sweetalert2'
 
 const LoginPage = () => {
@@ -20,6 +20,7 @@ const LoginPage = () => {
   const loginFinish = {
     position: 'top',
     title: '登入成功！',
+    text: '進入 Todos 頁面',
     timer: 2500,
     icon: 'success',
     showConfirmButton: true,
@@ -27,9 +28,9 @@ const LoginPage = () => {
   const loginFailed = {
     position: 'top',
     title: '登入失敗！',
-    timer: 2000,
+    text: '帳號密碼錯誤',
     icon: 'error',
-    showConfirmButton: false,
+    showConfirmButton: true,
   }
   const inputPostFailed = {
     position: 'top',
@@ -39,6 +40,22 @@ const LoginPage = () => {
     showConfirmButton: false,
   }
 
+  useEffect( () => {
+    const checkToken = async () => {
+      try{
+        const token = localStorage.getItem('authToken')
+        if (token){
+          const success = await checkPermission(token)
+          if (success){
+            navigate('/todos')
+            return
+          }
+        }
+      }
+      catch(error){console.error(error)}
+    }
+    checkToken()
+  }, [])
   async function handleClick (){
     if( username.trim() === '' || password.trim() === '' ){
       Swal.fire(inputPostFailed)
@@ -46,10 +63,10 @@ const LoginPage = () => {
     }
     try{
       const data =  await login({ username, password })
-      console.log(data)
       if (data.authToken){
+        localStorage.setItem('authToken', data.authToken)
         Swal.fire(loginFinish)
-        await setTimeout(navigate('/todos'), 2500)
+        navigate('/todos')
         return 
 
       }

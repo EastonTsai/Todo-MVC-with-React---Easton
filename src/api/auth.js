@@ -20,18 +20,33 @@ export async function login ({ username, password }){
   }
 }
 
-export async function singup ({ username, email, password }){
+export async function signUp ({ username, email, password }){
   const post = { username, email, password }
   try{
     const { data } = await axios.post(`${baseUrl}/register`, post)
     if ( data.authToken){
-      return({
+      return{
         success: true
-      })
+      }
     }
     return data.message
   }
   catch(error){
     console.error('singup post is failed', error)
+  }
+}
+export async function checkPermission ( token ){
+  const get ={
+    headers: {
+      Authorization: 'Bearer '+ token
+    }
+  }
+  try{
+    const { data } = await axios.get(`${baseUrl}/test-token`, get)
+    return data.success
+  }
+
+  catch(error){
+    console.error('Check Permission is failed', error)
   }
 }

@@ -7,8 +7,10 @@ import {
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { singup } from 'api/auth';
+import { useState, useEffect } from 'react';
+import { signUp } from 'api/auth';
+import Swal from "sweetalert2"
+import { checkPermission } from 'api/auth';
 
 const SignUpPage = () => {
   const [ username, setUsername ] = useState('')
@@ -16,14 +18,51 @@ const SignUpPage = () => {
   const [ password, setPassword ] = useState('')
   const navigate = useNavigate()
 
+  const signUpFininsh = {
+    position: 'top',
+    title: '註冊成功！',
+    text: '請輸入帳號完成登入',
+    icon: 'success',
+    showConfirmButton: true,
+  }
+  const signUpFailed = {
+    position: 'top',
+    title: '註冊失敗！',
+    text: '此帳號已被註冊',
+    icon: 'info',
+    showConfirmButton: true,
+  }
+
+  useEffect( () => {
+    const checkToken = async () => {
+      try{
+        const token = localStorage.getItem('authToken')
+        if (token){
+          const success = await checkPermission(token)
+          if (success){
+            navigate('/todos')
+            return
+          }
+        }
+      }
+      catch(error){console.error(error)}
+    }
+    checkToken()
+  }, [])
+
   async function handleClick (){
     try{
-      const singup = await singup({username, email, password})
+      const singup = await signUp({username, email, password})
       if ( singup.success ){
+        Swal.fire(signUpFininsh)
         navigate('/login')
         return
       }
-      return alert('此帳號密碼已被使用 ！')
+      Swal.fire(signUpFailed)
+      setUsername('')
+      setEmail('')
+      setPassword('')
+      return
     }
     catch(error){
       console.error(error)
