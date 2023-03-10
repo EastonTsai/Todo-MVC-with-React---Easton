@@ -1,31 +1,22 @@
 import { Footer, Header, TodoCollection, TodoInput } from 'components';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { getTodos, createTodo, patchTodo, deleteTodo } from '../api/CRUD'
 import { useNavigate } from 'react-router-dom';
-import { checkPermission } from 'api/auth';
-
+import { AuthContext } from 'context/AuthContext';
 
 
 const TodoPage = () => {
   const [userTodos, setUserTodos] = useState([]) //記錄 rserDtat 因為有資料才會顯示 item
   const [inputValue, setInputValue] = useState('') //記錄 input 的值 , 主要解決 input 欄有值才出現 '新增' 按鍵
   const navigate = useNavigate()
+  const { isAuthenticated, checkToken } = useContext(AuthContext)
 
   useEffect( () => {
-    const checkPermissionAuth = async () => {
-      const token = localStorage.getItem('authToken')
-      try{
-        const permission = await checkPermission(token)
-        if (!permission){
-          navigate('/login')
-        }
-      }
-      catch(error){
-        console.error(error)
-      }
+    checkToken()
+    if (!isAuthenticated){
+      return navigate('/login')
     }
-    checkPermissionAuth()
-  }, [])
+  }, [isAuthenticated])
   //進到網頁裡完成第一次渲染後使用 getTodos 的 API 取得資料庫的 todos 
   //'只觸發一次' 因為依賴一個空陣列 , 所以第一次渲染完就不會再被之後的渲染觸發
   useEffect( () => {
@@ -36,14 +27,14 @@ const TodoPage = () => {
         return { ...todo, isEdit: false}
       }))
       }
-      catch(error){console.error(error)}
+      catch(error){ console.error(error) }
   }
   getTodosAsync()
 },[])
 
   //新增到資料庫 , 再從資料庫抓取新的資料存到 userTodos
   async function handleAddTodo (){
-    await createTodo({title: inputValue})
+    await createTodo(inputValue)
     setUserTodos(await getTodos())
     setInputValue('')
   }

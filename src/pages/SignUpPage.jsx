@@ -7,16 +7,16 @@ import {
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { signUp } from 'api/auth';
 import Swal from "sweetalert2"
-import { checkPermission } from 'api/auth';
-
+import { AuthContext } from 'context/AuthContext';
 const SignUpPage = () => {
   const [ username, setUsername ] = useState('')
   const [ email, setEmail ] = useState('')
   const [ password, setPassword ] = useState('')
   const navigate = useNavigate()
+  const { isAuthenticated, checkToken } = useContext(AuthContext)
 
   const signUpFininsh = {
     position: 'top',
@@ -34,21 +34,11 @@ const SignUpPage = () => {
   }
 
   useEffect( () => {
-    const checkToken = async () => {
-      try{
-        const token = localStorage.getItem('authToken')
-        if (token){
-          const success = await checkPermission(token)
-          if (success){
-            navigate('/todos')
-            return
-          }
-        }
-      }
-      catch(error){console.error(error)}
-    }
     checkToken()
-  }, [])
+    if(isAuthenticated){
+      navigate('/todos')
+    }
+  }, [isAuthenticated])
 
   async function handleClick (){
     try{
@@ -64,9 +54,7 @@ const SignUpPage = () => {
       setPassword('')
       return
     }
-    catch(error){
-      console.error(error)
-    }
+    catch(error){ console.error(error) }
   }
 
   return (

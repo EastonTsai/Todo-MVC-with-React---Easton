@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from 'context/AuthContext';
 
 const StyledFooter = styled.footer`
   display: flex;
@@ -34,7 +36,9 @@ const StyledButton = styled.button`
 `;
 
 const Footer = ({userTodos}) => {
+  const { setIsAuthenticated } = useContext(AuthContext)
   const navigate = useNavigate()
+  //彈出視樣式
   const logup = {
     position: 'top',
     title: '您已經登出',
@@ -45,6 +49,7 @@ const Footer = ({userTodos}) => {
   function handleClick (){
     Swal.fire(logup)
     localStorage.removeItem('authToken')
+    setIsAuthenticated(false)
     navigate('/login')
   }
 

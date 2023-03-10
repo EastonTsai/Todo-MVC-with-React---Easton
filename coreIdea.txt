@@ -1,0 +1,22 @@
+
+
+身份驗證 : 
+  進到每個頁面都需要進行 '身份驗證' , 
+  所以每個頁面的 component 裡都會有一段 useEffect() ,
+  裡面在做的是 => {
+    查看 localStorage 有沒有 token 
+    向 '/test-token' 確認 token 有沒有效
+  }
+
+因為每頁都有一樣的 code , 所以整理到 context 裡共享 :
+  設置一個 '狀態' 
+    isAuthenticated = useState( true || false ) 記錄是否 '已認證'
+  設置一個確認是否 '已認證' 的 checkToken()
+  把 { 狀態, set狀態, checkToken } 放到 context 裡
+
+  想一下 , 會改變 '狀態' 的有誰 ?
+    { 登入 , 登出 }
+  要知道 '狀態' 的有誰 ?
+    都要
+  要確認是否 '已認證' 的有誰 ?
+    

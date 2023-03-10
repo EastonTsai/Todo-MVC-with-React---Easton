@@ -23,6 +23,7 @@ export async function login ({ username, password }){
 export async function signUp ({ username, email, password }){
   const post = { username, email, password }
   try{
+    //{ data } 的意思是 = 回傳的物件 { 裡面的 data }
     const { data } = await axios.post(`${baseUrl}/register`, post)
     if ( data.authToken){
       return{
@@ -35,6 +36,7 @@ export async function signUp ({ username, email, password }){
     console.error('singup post is failed', error)
   }
 }
+//傳入 token , 回傳值: 布林
 export async function checkPermission ( token ){
   const get ={
     headers: {
@@ -45,7 +47,6 @@ export async function checkPermission ( token ){
     const { data } = await axios.get(`${baseUrl}/test-token`, get)
     return data.success
   }
-
   catch(error){
     console.error('Check Permission is failed', error)
   }

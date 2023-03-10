@@ -1,28 +1,22 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkPermission } from "api/auth";
+import { AuthContext } from "context/AuthContext";
 
 const HomePage = () => {
   const navigate = useNavigate()
-
-  useEffect( () => {
-    const checkToken = async () => {
-      try{
-        const token = localStorage.getItem('authToken')
-        if (token){
-          const success = await checkPermission(token)
-          if (success){
-            navigate('/todos')
-            return 
-          }
-          navigate('/login')
-          return 
-        }
-      }
-      catch(error){console.error(error)}
-    }
+  const { isAuthenticated, checkToken } = useContext(AuthContext)
+  
+  useEffect( ()=> {
     checkToken()
-  }, [])
+    if( !isAuthenticated ){
+      navigate('/login')
+    }
+    else{
+      navigate('/todos')
+    }
+  }, [isAuthenticated])
+  
+
 
   return <div>HomePage</div>;
 };

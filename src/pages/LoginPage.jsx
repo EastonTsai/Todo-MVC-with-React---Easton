@@ -7,14 +7,18 @@ import {
 import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react'
-import { checkPermission, login } from 'api/auth';
+import { useState, useEffect, useContext } from 'react'
 import Swal from 'sweetalert2'
+import { login } from 'api/auth';
+import { AuthContext } from 'context/AuthContext';
+import { checkPermission } from 'api/auth';
 
 const LoginPage = () => {
   const [ username, setUsername ] = useState('')
   const [ password, setPassword ] = useState('')
+  const { isAuthenticated, setIsAuthenticated, checkToken } = useContext(AuthContext)
   const navigate = useNavigate()
+
 
   //登入成功或失敗的彈出視窗樣式
   const loginFinish = {
@@ -41,21 +45,11 @@ const LoginPage = () => {
   }
 
   useEffect( () => {
-    const checkToken = async () => {
-      try{
-        const token = localStorage.getItem('authToken')
-        if (token){
-          const success = await checkPermission(token)
-          if (success){
-            navigate('/todos')
-            return
-          }
-        }
-      }
-      catch(error){console.error(error)}
-    }
     checkToken()
-  }, [])
+    if(isAuthenticated){
+      navigate('/todos')
+    }
+  }, [isAuthenticated])
   async function handleClick (){
     if( username.trim() === '' || password.trim() === '' ){
       Swal.fire(inputPostFailed)
@@ -65,19 +59,17 @@ const LoginPage = () => {
       const data =  await login({ username, password })
       if (data.authToken){
         localStorage.setItem('authToken', data.authToken)
+        setIsAuthenticated(true)
         Swal.fire(loginFinish)
         navigate('/todos')
         return 
-
       }
       Swal.fire(loginFailed)
       setPassword('')
       setUsername('')
       return 
     }
-    catch(error){
-      console.error(error)
-    }
+    catch(error){ console.error(error) }
   }
 
   return (
