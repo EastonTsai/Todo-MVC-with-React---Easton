@@ -5,6 +5,8 @@ import { AuthContext } from './context/AuthContext'
 import { useState } from 'react'
 import { checkPermission } from 'api/auth';
 
+const basename = process.env.PUBLIC_URL
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
@@ -25,7 +27,7 @@ function App() {
 
   return (
     <div className="app">
-      <BrowserRouter>
+      <BrowserRouter basename ={basename}>
         <AuthContext.Provider value={{
           isAuthenticated: isAuthenticated,
           setIsAuthenticated: setIsAuthenticated,
